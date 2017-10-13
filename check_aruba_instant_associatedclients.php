@@ -1,19 +1,19 @@
 <?php
-// check_wap321_associatedclients.php
-// Check Associated Clients for Cisco WAP321
+// check_aruba_instant_associatedclients.php
+// Check Associated Clients for Aruba Instant Wireless Access Points
 // Manufacturer recommended levels are 20 for warning and 35 for critical.
-// 
-// USAGE: php check_wap321_associatedclients.php HOST COMMUNITY WARNING CRITICAL
-// HOST: IP or FQDN of the target Cisco WAP321 device.
+//
+// USAGE: php check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL
+// HOST: IP or FQDN of the target Aruba Instant device.
 // COMMUNITY: SNMP Community Name
 // WARNING: Amount of Associated Client connections to trigger WARNING
 // CRITICAL: Amount of Associated Client connections to trigger CRITICAL
-// EXAMPLE: php check_wap321_associatedclients.php 192.168.1.1 public 20 35
+// EXAMPLE: php check_aruba_instant_associatedclients.php 192.168.1.1 public 20 35
 //
 // Include in commands.cfg
 // define command{
-// command_name check_wap321_associatedclients
-// command_line php /path/to/check_wap321_associatedclients.php $HOSTADDRESS $ARG1$ $ARG2$ $ARG3$
+// command_name check_aruba_instant_associatedclients
+// command_line php /path/to/check_aruba_instant_associatedclients.php $HOSTADDRESS $ARG1$ $ARG2$ $ARG3$
 // }
 //
 // This plugin requires php5-snmp to be installed
@@ -25,8 +25,8 @@ $message ='';
 $status = 0;
 
 // Check if all arguments are supplied
-if(count($argv) < 4)
-  DisplayMessage(3, "Incomplete statement.\r\nUSAGE: check_terastation_storage.php HOST COMMUNITY WARNING CRITICAL\r\n");
+if(count($argv) < 5)
+  DisplayMessage(3, "Incomplete statement.\r\nUSAGE: check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
 
 //Assign supplied arguments
 list(,$host, $community, $warning, $critical,) = $argv;
@@ -35,15 +35,17 @@ $critical=(float)$critical;
 
 //If warning less than critial, give usage example and exit.
 if($warning > $critical)
-  DisplayMessage(3, "The WARNING value cannot be higher than the CRITICAL value.\r\nUSAGE: check_wap321_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
+  DisplayMessage(3, "The WARNING value cannot be higher than the CRITICAL value.\r\nUSAGE: check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
 elseif( empty($host) || empty($community) )
-  DisplayMessage(3, "Error, host and/or community is empty.\r\nUSAGE: check_wap321_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
-
+  DisplayMessage(3, "Error, host and/or community is empty.\r\nUSAGE: check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
+echo "test\r\n"; //DEBUG
 // Test connection, SNMP availability, and valid Community.
 GetSnmpObjValue($host, $community, 'iso.3.6.1.2.1.1.1.0');
 
-// Take a walk on the OID and get the list of wlans in use.
-$ret = snmpwalk("$host", "$community", "1.3.6.1.4.1.9.6.1.104.1.7.1.1.2");
+// Take a walk on the OID and get the list of IPs connected to the AP.
+$ret = snmpwalk("$host", "$community", "iso.3.6.1.4.1.14823.2.3.3.1.2.4.1.3");
+echo "ret:\r\n";  //DEBUG
+print_r($ret); //DEBUG
 if( $ret === false )		//If walk unsuccessful or empty, fail.
  DisplayMessage(3, "SNMPWALK unsuccessful. Please verify OID for this device.");
 else $totalAssociatedClients=count($ret);//Array size gives us num of clients
