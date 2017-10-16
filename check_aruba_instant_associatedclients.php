@@ -63,18 +63,22 @@ if( $totalAssociatedClients >= $critical ) {
  $message.="OK - Total Associated Clients ($totalAssociatedClients) ";
 }
 
-// Go through results and strip everything but the wlan name from the string
+// Go through results and strip IpAddress from each result, leaving only the IP
+// Then strip off the the last 2 octets of each IP to get WLAN count
+// **This assumes Class B subnets, for Class C only strip off 1 octet.
 foreach( $ret as $key => $value) {
- $sploded = explode('"', $ret[$key]);
+ $sploded = explode(' ', $ret[$key]);
  $ret[$key]=$sploded[1];
+ $sploded = explode('.', $ret[$key]);
+ $ret[$key]=$sploded[0].'.'.$sploded[1].'.0.0';
 }
 
 // Break results into an array containing wlan names and num clients for each
-$wlans = array_count_values($ret);
+$subnets = array_count_values($ret);
 
 // Append all wlans found and amount of clients associated with each to message
-foreach( $wlans as $wlanName => $wlanClientsAmt ) {
- $message.= "- $wlanName ($wlanClientsAmt) ";
+foreach( $subnets as $subnet => $subnetAmt ) {
+ $message.= "- $subnet ($subnetAmt) ";
 }
 
 DisplayMessage($status, $message);
