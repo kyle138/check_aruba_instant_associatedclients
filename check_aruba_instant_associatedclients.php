@@ -1,7 +1,8 @@
 <?php
 // check_aruba_instant_associatedclients.php
 // Check Associated Clients for Aruba Instant Wireless Access Points
-// Manufacturer recommended levels are 20 for warning and 35 for critical.
+// Manufacturer recommended levels are 30 for warning and 40 for critical.
+// (Technically each AP can handle 99 clients)
 //
 // USAGE: php check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL
 // HOST: IP or FQDN of the target Aruba Instant device.
@@ -38,14 +39,11 @@ if($warning > $critical)
   DisplayMessage(3, "The WARNING value cannot be higher than the CRITICAL value.\r\nUSAGE: check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
 elseif( empty($host) || empty($community) )
   DisplayMessage(3, "Error, host and/or community is empty.\r\nUSAGE: check_aruba_instant_associatedclients.php HOST COMMUNITY WARNING CRITICAL\r\n");
-echo "test\r\n"; //DEBUG
 // Test connection, SNMP availability, and valid Community.
 GetSnmpObjValue($host, $community, 'iso.3.6.1.2.1.1.1.0');
 
 // Take a walk on the OID and get the list of IPs connected to the AP.
 $ret = snmpwalk("$host", "$community", "iso.3.6.1.4.1.14823.2.3.3.1.2.4.1.3");
-echo "ret:\r\n";  //DEBUG
-print_r($ret); //DEBUG
 if( $ret === false )		//If walk unsuccessful or empty, fail.
  DisplayMessage(3, "SNMPWALK unsuccessful. Please verify OID for this device.");
 else $totalAssociatedClients=count($ret);//Array size gives us num of clients
